@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Misseis</title>
+    <script src="Sprite.js" charset="utf-8"></script>
+    <script src="Maps.js" charset="utf-8"></script>
+    <script src="Level.js" charset="utf-8"></script>
+  </head>
+  <body>
+    <canvas></canvas>
+    <script>
+    var eCanvas = document.getElementsByTagName("canvas")[0];
+    var ctx = eCanvas.getContext("2d");
+    eCanvas.width = 1000;
+    eCanvas.height = 500;
+
+    var fps = 120;
+    var dt = 1/fps;
+    var atual = new Date();
+    var anterior = new Date();
+
+    var actor = new Sprite();
+    var map = new Maps();
+    var enemy = new Level();
+    var gun = new Sprite();
+
+    gun.x = 570;
+    gun.y = 380;
+    gun.width = 30;
+    gun.height = 1;
+    gun.angle = 90;
+    gun.color = "black";
+
+    map.init();
+    enemy.init();
+
+    desenha();
+
+    function desenha(){
+      requestAnimationFrame(desenha);
+
+      atual = new Date();
+      dt = (atual - anterior)/1000;
+
+      ctx.clearRect(0,0,eCanvas.width,eCanvas.height);
+      ctx.strokeRect(0,0,eCanvas.width,eCanvas.height);
+
+      actor.desenha(ctx);
+      map.desenha(ctx);
+      enemy.desenhar(ctx);
+      gun.desenha(ctx);
+
+      enemy.mover(dt);
+      gun.moverGun(dt);
+
+      enemy.colidiuComTiros();
+      map.colidiuComEnemy(enemy);
+
+      if(map.sprites.length < 0){
+          ctx.clearRect(0,0,eCanvas.width,eCanvas.height);
+          ctx.fillText("You lose",500,250);
+
+      }
+
+      for(var i = 0; i < enemy.sprites.length; i++){
+        if(enemy.sprites[i].y > 500){
+          var r = (Math.random()*1000);
+          enemy.sprites[i].y = 0;
+          enemy.sprites[i].x = r;
+          enemy.desenha(ctx);
+          pontos = pontos + 5;
+        }
+      }
+
+      anterior = atual;
+    }
+
+    addEventListener("keydown", function(e){
+        switch (e.keyCode) {
+          case 32:
+            enemy.fire(actor);
+            break;
+          case 37:
+            actor.vang = -100;
+            break;
+          case 39:
+            actor.vang = +100;
+            break;
+          default:
+
+        }
+      });
+      addEventListener("keyup", function(e){
+        switch (e.keyCode) {
+          case 37:
+            actor.vang = 0;
+            break;
+          case 39:
+            actor.vang = 0;
+            break;
+          default:
+
+        }
+      });
+
+    </script>
+  </body>
+</html>
